@@ -1,6 +1,6 @@
 package social_media_platform.app.models;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
