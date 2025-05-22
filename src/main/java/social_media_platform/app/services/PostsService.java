@@ -1,20 +1,28 @@
 package social_media_platform.app.services;
 
+import java.io.File;
+import java.net.MalformedURLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import social_media_platform.app.models.Comment;
 import social_media_platform.app.models.Friend;
+import social_media_platform.app.models.Image;
 import social_media_platform.app.models.Like;
 import social_media_platform.app.models.Post;
 import social_media_platform.app.models.User;
@@ -24,6 +32,8 @@ import social_media_platform.app.repositories.UserRepository;
 
 @Service
 public class PostsService {
+    private final String imagesDir = "postsImages";
+
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -66,9 +76,70 @@ public class PostsService {
 
         List<Post> allFriendsPosts = getAllFriendsPosts(user);
 
-        List<Post> feedPosts = getRandomSetOfPosts(allFriendsPosts, numOfPosts);
+        List<Post> feedPosts = getRandomSetOfPosts(allFriendsPosts, Math.min(numOfPosts, allFriendsPosts.size()));
 
         return new ResponseEntity<List<Post>>(feedPosts, HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> postAPost(Map<String, String> postDetails, List<MultipartFile> images){
+        Optional<User> userOptional = userRepository.findById(postDetails.get("userEmail"));
+
+        if(userOptional.isEmpty()){
+            return new ResponseEntity<String>("User Not Found", HttpStatus.NOT_FOUND);
+        }
+
+        Post newPost= new Post()
+        .text_content(postDetails.get("textContent"))
+        .user(userOptional.get())
+        .date_Posted(new Timestamp(Instant.now().toEpochMilli()));
+        
+        Iterator<MultipartFile> imagesIter = images.iterator();
+        List<Image> postImagesObjects= new ArrayList<Image>(images.size());
+
+        // Check if directory exists, if not it creates it
+        File dir = new File(imagesDir);
+        if (!dir.exists()) dir.mkdirs();
+
+        while(imagesIter.hasNext()){
+            MultipartFile currentImage = imagesIter.next();
+            
+            try{
+                currentImage.transferTo(new File(imagesDir + currentImage.getOriginalFilename()));
+                postImagesObjects.add(
+                    new Image()
+                    .name(currentImage.getOriginalFilename())
+                );
+            }catch(Exception exception){
+                return new ResponseEntity<String>("Error happened while saving the post image", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        newPost.setImages(postImagesObjects);
+        postRepository.save(newPost);
+        return new ResponseEntity<Void>(HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> getPostImage(int postId, int imageNum){
+        Optional<Post> postOptional=postRepository.findById(postId);
+
+        if(postOptional.isEmpty()){
+            return new ResponseEntity<String>("Post Not Found", HttpStatus.NOT_FOUND);
+        }
+
+        Post post=postOptional.get();
+
+        if(imageNum>=post.getImages().size()){
+            return new ResponseEntity<String>("Image Not Found", HttpStatus.NOT_FOUND);
+        }
+
+        String imageFullPath = imagesDir + post.getImages().get(imageNum).getName();
+        Resource imageResource;
+        try {
+            imageResource = new UrlResource(imageFullPath);
+        } catch (MalformedURLException e) {
+            return new ResponseEntity<String>("Error while retrieving the image", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageResource);
     }
 
     public ResponseEntity<?> likePost(int postId, String userEmail){
