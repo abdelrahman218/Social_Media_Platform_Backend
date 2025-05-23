@@ -43,12 +43,12 @@ public class PostsService {
 
     private List<Post> getAllFriendsPosts(User user) {
         List<Post> allPosts = new ArrayList<Post>();
-        Iterator<Friend> friendsIterator = friendRepository.findByUser1AndIs_pending(user, false).iterator();
+        Iterator<Friend> friendsIterator = friendRepository.findByUser1AndIsPending(user, false).iterator();
         while (friendsIterator.hasNext()) {
             Friend friend = friendsIterator.next();
             allPosts.addAll(postRepository.findByUser(friend.getUser2()));
         }
-        friendsIterator = friendRepository.findByUser2AndIs_pending(user, false).iterator();
+        friendsIterator = friendRepository.findByUser2AndIsPending(user, false).iterator();
         while (friendsIterator.hasNext()) {
             Friend friend = friendsIterator.next();
             allPosts.addAll(postRepository.findByUser(friend.getUser1()));

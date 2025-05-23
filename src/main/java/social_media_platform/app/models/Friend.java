@@ -26,18 +26,18 @@ public class Friend {
     private User user2;
 
     @Column(nullable = false)
-    private boolean is_pending;
+    private boolean isPending;
     @Column(nullable = false)
     private Timestamp date_created;
-    
+
 
     public Friend() {
     }
 
-    public Friend(User user1, User user2, boolean is_pending, Timestamp date_created) {
+    public Friend(User user1, User user2, boolean isPending, Timestamp date_created) {
         this.user1 = user1;
         this.user2 = user2;
-        this.is_pending = is_pending;
+        this.isPending = isPending;
         this.date_created = date_created;
     }
 
@@ -57,16 +57,16 @@ public class Friend {
         this.user2 = user2;
     }
 
-    public boolean isIs_pending() {
-        return this.is_pending;
+    public boolean isIsPending() {
+        return this.isPending;
     }
 
-    public boolean getIs_pending() {
-        return this.is_pending;
+    public boolean getIsPending() {
+        return this.isPending;
     }
 
-    public void setIs_pending(boolean is_pending) {
-        this.is_pending = is_pending;
+    public void setIsPending(boolean isPending) {
+        this.isPending = isPending;
     }
 
     public Timestamp getDate_created() {
@@ -87,8 +87,8 @@ public class Friend {
         return this;
     }
 
-    public Friend is_pending(boolean is_pending) {
-        setIs_pending(is_pending);
+    public Friend isPending(boolean isPending) {
+        setIsPending(isPending);
         return this;
     }
 
@@ -105,12 +105,12 @@ public class Friend {
             return false;
         }
         Friend friend = (Friend) o;
-        return Objects.equals(user1, friend.user1) && Objects.equals(user2, friend.user2) && is_pending == friend.is_pending && Objects.equals(date_created, friend.date_created);
+        return Objects.equals(user1, friend.user1) && Objects.equals(user2, friend.user2) && isPending == friend.isPending && Objects.equals(date_created, friend.date_created);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user1, user2, is_pending, date_created);
+        return Objects.hash(user1, user2, isPending, date_created);
     }
 
     @Override
@@ -118,9 +118,9 @@ public class Friend {
         return "{" +
             " user1='" + getUser1() + "'" +
             ", user2='" + getUser2() + "'" +
-            ", is_pending='" + isIs_pending() + "'" +
+            ", isPending='" + isIsPending() + "'" +
             ", date_created='" + getDate_created() + "'" +
             "}";
     }
-    
+
 }
