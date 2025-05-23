@@ -27,6 +27,7 @@ import social_media_platform.app.models.Like;
 import social_media_platform.app.models.Post;
 import social_media_platform.app.models.User;
 import social_media_platform.app.repositories.FriendRepository;
+import social_media_platform.app.repositories.ImageRepository;
 import social_media_platform.app.repositories.PostRepository;
 import social_media_platform.app.repositories.UserRepository;
 
@@ -40,6 +41,8 @@ public class PostsService {
     private FriendRepository friendRepository;
     @Autowired
     private PostRepository postRepository;
+    @Autowired
+    private ImageRepository imageRepository;
 
     private List<Post> getAllFriendsPosts(User user) {
         List<Post> allPosts = new ArrayList<Post>();
@@ -119,20 +122,14 @@ public class PostsService {
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
-    public ResponseEntity<?> getPostImage(int postId, int imageNum){
-        Optional<Post> postOptional=postRepository.findById(postId);
+    public ResponseEntity<?> getPostImage(int imageId){
+        Optional<Image> image=imageRepository.findById(imageId);
 
-        if(postOptional.isEmpty()){
-            return new ResponseEntity<String>("Post Not Found", HttpStatus.NOT_FOUND);
-        }
-
-        Post post=postOptional.get();
-
-        if(imageNum>=post.getImages().size()){
+        if(image.isEmpty()){
             return new ResponseEntity<String>("Image Not Found", HttpStatus.NOT_FOUND);
         }
 
-        String imageFullPath = imagesDir + post.getImages().get(imageNum).getName();
+        String imageFullPath = imagesDir + image.get().getName();
         Resource imageResource;
         try {
             imageResource = new UrlResource(imageFullPath);

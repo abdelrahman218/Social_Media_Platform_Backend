@@ -35,8 +35,8 @@ public class UserController {
     }
     
     @GetMapping("/getPostImage")
-    public ResponseEntity<?> getPostImage(@RequestParam String postId, @RequestParam String imageNum) {
-        return postsService.getPostImage(Integer.parseInt(postId), Integer.parseInt(imageNum));
+    public ResponseEntity<?> getPostImage(@RequestParam String imageId) {
+        return postsService.getPostImage(Integer.parseInt(imageId));
     }
 
     @PostMapping("/likePost")
