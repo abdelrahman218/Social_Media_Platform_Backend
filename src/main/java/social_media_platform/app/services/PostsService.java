@@ -28,6 +28,7 @@ import social_media_platform.app.models.Post;
 import social_media_platform.app.models.User;
 import social_media_platform.app.repositories.FriendRepository;
 import social_media_platform.app.repositories.ImageRepository;
+import social_media_platform.app.repositories.LikeRepository;
 import social_media_platform.app.repositories.PostRepository;
 import social_media_platform.app.repositories.UserRepository;
 
@@ -43,6 +44,8 @@ public class PostsService {
     private PostRepository postRepository;
     @Autowired
     private ImageRepository imageRepository;
+    @Autowired
+    private LikeRepository likeRepository;
 
     private List<Post> getAllFriendsPosts(User user) {
         List<Post> allPosts = new ArrayList<Post>();
@@ -163,6 +166,37 @@ public class PostsService {
         post.getLikes().add(like);
 
         postRepository.save(post);
+
+        return new ResponseEntity<Void>(HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> unLikePost(int postId, String userEmail){
+        Optional<Post> postOptional=postRepository.findById(postId);
+
+        if(postOptional.isEmpty()){
+            return new ResponseEntity<String>("Post Not Found", HttpStatus.NOT_FOUND);
+        }
+
+        Post post=postOptional.get();
+
+        Optional<User> userOptional=userRepository.findById(userEmail);
+
+        if(userOptional.isEmpty()){
+            return new ResponseEntity<String>("User Not Found", HttpStatus.NOT_FOUND);
+        }
+
+        User user=userOptional.get();
+
+        Iterator<Like> likeIterator= post.getLikes().iterator();
+
+        while (likeIterator.hasNext()) {
+            Like like = likeIterator.next();
+
+            if(like.getUser()==user){
+                likeRepository.delete(like);
+                break;
+            }
+        }
 
         return new ResponseEntity<Void>(HttpStatus.OK);
     }

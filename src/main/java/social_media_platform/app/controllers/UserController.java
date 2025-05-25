@@ -30,8 +30,8 @@ public class UserController {
     }
     
     @PostMapping("/postAPost")
-    public ResponseEntity<?> postAPost(@RequestBody Map<String, String> postDetails, @RequestParam("files") List<MultipartFile> photos) {
-        return postsService.postAPost(postDetails, photos);
+    public ResponseEntity<?> postAPost(@RequestBody Map<String, String> postDetails, @RequestParam List<MultipartFile> images) {
+        return postsService.postAPost(postDetails, images);
     }
     
     @GetMapping("/getPostImage")
@@ -42,6 +42,11 @@ public class UserController {
     @PostMapping("/likePost")
     public ResponseEntity<?> likePost(@RequestBody Map<String, String> body) {
         return postsService.likePost(Integer.parseInt(body.get("postId")), body.get("userEmail"));
+    }
+    
+    @PostMapping("/unlikePost")
+    public ResponseEntity<?> unlikePost(@RequestBody Map<String, String> body) {
+        return postsService.unLikePost(Integer.parseInt(body.get("postId")), body.get("userEmail"));
     }
     
     @PostMapping("/commentPost")
