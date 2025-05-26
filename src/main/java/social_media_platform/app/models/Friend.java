@@ -17,12 +17,12 @@ import java.util.Objects;
 public class Friend {
     @Id
     @ManyToOne
-    @JoinColumn(name = "user_1_email", referencedColumnName = "email")
+    @JoinColumn(name = "user_1_email", columnDefinition = "VARCHAR(255)" ,referencedColumnName = "email")
     private User user1;
 
     @Id
     @ManyToOne
-    @JoinColumn(name = "user_2_email", referencedColumnName = "email")
+    @JoinColumn(name = "user_2_email", columnDefinition = "VARCHAR(255)" ,referencedColumnName = "email")
     private User user2;
 
     @Column(nullable = false)
