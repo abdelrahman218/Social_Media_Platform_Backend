@@ -26,15 +26,18 @@ public class Friend {
     private User user2;
 
     @Column(nullable = false)
+    private boolean isPending;
+    @Column(nullable = false)
     private Timestamp date_created;
 
 
     public Friend() {
     }
 
-    public Friend(User user1, User user2, Timestamp date_created) {
+    public Friend(User user1, User user2, boolean isPending, Timestamp date_created) {
         this.user1 = user1;
         this.user2 = user2;
+        this.isPending = isPending;
         this.date_created = date_created;
     }
 
@@ -52,6 +55,18 @@ public class Friend {
 
     public void setUser2(User user2) {
         this.user2 = user2;
+    }
+
+    public boolean isIsPending() {
+        return this.isPending;
+    }
+
+    public boolean getIsPending() {
+        return this.isPending;
+    }
+
+    public void setIsPending(boolean isPending) {
+        this.isPending = isPending;
     }
 
     public Timestamp getDate_created() {
@@ -72,6 +87,11 @@ public class Friend {
         return this;
     }
 
+    public Friend isPending(boolean isPending) {
+        setIsPending(isPending);
+        return this;
+    }
+
     public Friend date_created(Timestamp date_created) {
         setDate_created(date_created);
         return this;
@@ -85,12 +105,12 @@ public class Friend {
             return false;
         }
         Friend friend = (Friend) o;
-        return Objects.equals(user1, friend.user1) && Objects.equals(user2, friend.user2) && Objects.equals(date_created, friend.date_created);
+        return Objects.equals(user1, friend.user1) && Objects.equals(user2, friend.user2) && isPending == friend.isPending && Objects.equals(date_created, friend.date_created);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user1, user2, date_created);
+        return Objects.hash(user1, user2, isPending, date_created);
     }
 
     @Override
@@ -98,8 +118,9 @@ public class Friend {
         return "{" +
             " user1='" + getUser1() + "'" +
             ", user2='" + getUser2() + "'" +
+            ", isPending='" + isIsPending() + "'" +
             ", date_created='" + getDate_created() + "'" +
             "}";
     }
-    
+
 }
