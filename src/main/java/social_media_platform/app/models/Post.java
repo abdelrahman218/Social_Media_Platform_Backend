@@ -1,6 +1,6 @@
 package social_media_platform.app.models;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -24,7 +24,7 @@ public class Post {
     @OneToMany(cascade = CascadeType.ALL)
     private List<Image> images;
     @OneToMany(cascade = CascadeType.ALL)
-    private List<Like> likes;
+    private List<PostLike> likes;
     @OneToMany(cascade = CascadeType.ALL)
     private List<Comment> comments;
 
@@ -36,7 +36,7 @@ public class Post {
     public Post() {
     }
 
-    public Post(int postId, User user, List<Image> images, List<Like> likes, List<Comment> comments, String text_content, Timestamp date_Posted) {
+    public Post(int postId, User user, List<Image> images, List<PostLike> likes, List<Comment> comments, String text_content, Timestamp date_Posted) {
         this.postId = postId;
         this.user = user;
         this.images = images;
@@ -70,11 +70,11 @@ public class Post {
         this.images = images;
     }
 
-    public List<Like> getLikes() {
+    public List<PostLike> getLikes() {
         return this.likes;
     }
 
-    public void setLikes(List<Like> likes) {
+    public void setLikes(List<PostLike> likes) {
         this.likes = likes;
     }
 
@@ -117,7 +117,7 @@ public class Post {
         return this;
     }
 
-    public Post likes(List<Like> likes) {
+    public Post likes(List<PostLike> likes) {
         setLikes(likes);
         return this;
     }
