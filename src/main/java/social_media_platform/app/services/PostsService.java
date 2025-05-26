@@ -1,6 +1,7 @@
 package social_media_platform.app.services;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.sql.Timestamp;
@@ -87,6 +88,38 @@ public class PostsService {
         return new ResponseEntity<List<Post>>(feedPosts, HttpStatus.OK);
     }
 
+    private void addPostText(Post post, String textContent) {
+        if (textContent == null) {
+            return;
+        }
+
+        post.text_content(textContent);
+    }
+
+    private void addPostImages(Post post, List<MultipartFile> images) throws IOException {
+        if (images == null) {
+            return;
+        }
+
+        Iterator<MultipartFile> imagesIter = images.iterator();
+        List<Image> postImagesObjects = new ArrayList<Image>(images.size());
+
+        // Check if directory exists, if not it creates it
+        File dir = new File(imagesDir);
+        if (!dir.exists())
+            dir.mkdirs();
+
+        while (imagesIter.hasNext()) {
+            MultipartFile currentImage = imagesIter.next();
+            currentImage.transferTo(dir.toPath().resolve(currentImage.getOriginalFilename()));
+            postImagesObjects.add(
+                    new Image()
+                            .name(currentImage.getOriginalFilename()));
+        }
+
+        post.setImages(postImagesObjects);
+    }
+
     public ResponseEntity<?> postAPost(String textContent, String userEmail, List<MultipartFile> images) {
         if (textContent == null && images == null) {
             return new ResponseEntity<String>("Post must contain images or text", HttpStatus.BAD_REQUEST);
@@ -102,37 +135,13 @@ public class PostsService {
                 .user(userOptional.get())
                 .date_Posted(new Timestamp(Instant.now().toEpochMilli()));
 
-        if (textContent != null) {
-            newPost.text_content(textContent);
+        addPostText(newPost, textContent);
+        try {
+            addPostImages(newPost, images);            
+        } catch (Exception e) {
+            return new ResponseEntity<String>("Error happened while saving images", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (images != null) {
-            Iterator<MultipartFile> imagesIter = images.iterator();
-            List<Image> postImagesObjects = new ArrayList<Image>(images.size());
-
-            // Check if directory exists, if not it creates it
-            File dir = new File(imagesDir);
-            if (!dir.exists())
-                dir.mkdirs();
-            
-            while (imagesIter.hasNext()) {
-                MultipartFile currentImage = imagesIter.next();
-
-                try {
-                    currentImage.transferTo(dir.toPath().resolve(currentImage.getOriginalFilename()));
-                    postImagesObjects.add(
-                        new Image()
-                        .name(currentImage.getOriginalFilename()));
-                } catch (Exception exception) {
-                    System.out.println(exception);
-                    return new ResponseEntity<String>("Error happened while saving the post image",
-                            HttpStatus.INTERNAL_SERVER_ERROR);
-                }
-            }
-
-            newPost.setImages(postImagesObjects);
-        }
-
+        
         postRepository.save(newPost);
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
