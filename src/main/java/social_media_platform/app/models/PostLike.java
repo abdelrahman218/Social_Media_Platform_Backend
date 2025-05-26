@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-public class Like {
+public class PostLike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int likeId;
@@ -23,10 +23,10 @@ public class Like {
     private Timestamp date_created;
 
 
-    public Like() {
+    public PostLike() {
     }
 
-    public Like(int likeId, User user, Timestamp date_created) {
+    public PostLike(int likeId, User user, Timestamp date_created) {
         this.likeId = likeId;
         this.user = user;
         this.date_created = date_created;
@@ -56,17 +56,17 @@ public class Like {
         this.date_created = date_created;
     }
 
-    public Like likeId(int likeId) {
+    public PostLike likeId(int likeId) {
         setLikeId(likeId);
         return this;
     }
 
-    public Like user(User user) {
+    public PostLike user(User user) {
         setUser(user);
         return this;
     }
 
-    public Like date_created(Timestamp date_created) {
+    public PostLike date_created(Timestamp date_created) {
         setDate_created(date_created);
         return this;
     }
@@ -75,11 +75,11 @@ public class Like {
     public boolean equals(Object o) {
         if (o == this)
             return true;
-        if (!(o instanceof Like)) {
+        if (!(o instanceof PostLike)) {
             return false;
         }
-        Like like = (Like) o;
-        return likeId == like.likeId && Objects.equals(user, like.user) && Objects.equals(date_created, like.date_created);
+        PostLike postLike = (PostLike) o;
+        return likeId == postLike.likeId && Objects.equals(user, postLike.user) && Objects.equals(date_created, postLike.date_created);
     }
 
     @Override

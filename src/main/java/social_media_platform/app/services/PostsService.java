@@ -2,13 +2,13 @@ package social_media_platform.app.services;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import social_media_platform.app.models.Comment;
 import social_media_platform.app.models.Friend;
 import social_media_platform.app.models.Image;
-import social_media_platform.app.models.Like;
+import social_media_platform.app.models.PostLike;
 import social_media_platform.app.models.Post;
 import social_media_platform.app.models.User;
 import social_media_platform.app.repositories.FriendRepository;
@@ -87,79 +87,90 @@ public class PostsService {
         return new ResponseEntity<List<Post>>(feedPosts, HttpStatus.OK);
     }
 
-    public ResponseEntity<?> postAPost(Map<String, String> postDetails, List<MultipartFile> images){
-        Optional<User> userOptional = userRepository.findById(postDetails.get("userEmail"));
+    public ResponseEntity<?> postAPost(String textContent, String userEmail, List<MultipartFile> images) {
+        if (textContent == null && images == null) {
+            return new ResponseEntity<String>("Post must contain images or text", HttpStatus.BAD_REQUEST);
+        }
 
-        if(userOptional.isEmpty()){
+        Optional<User> userOptional = userRepository.findById(userEmail);
+
+        if (userOptional.isEmpty()) {
             return new ResponseEntity<String>("User Not Found", HttpStatus.NOT_FOUND);
         }
 
-        Post newPost= new Post()
-        .text_content(postDetails.get("textContent"))
-        .user(userOptional.get())
-        .date_Posted(new Timestamp(Instant.now().toEpochMilli()));
-        
-        Iterator<MultipartFile> imagesIter = images.iterator();
-        List<Image> postImagesObjects= new ArrayList<Image>(images.size());
+        Post newPost = new Post()
+                .user(userOptional.get())
+                .date_Posted(new Timestamp(Instant.now().toEpochMilli()));
 
-        // Check if directory exists, if not it creates it
-        File dir = new File(imagesDir);
-        if (!dir.exists()) dir.mkdirs();
-
-        while(imagesIter.hasNext()){
-            MultipartFile currentImage = imagesIter.next();
-            
-            try{
-                currentImage.transferTo(new File(imagesDir + currentImage.getOriginalFilename()));
-                postImagesObjects.add(
-                    new Image()
-                    .name(currentImage.getOriginalFilename())
-                );
-            }catch(Exception exception){
-                return new ResponseEntity<String>("Error happened while saving the post image", HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+        if (textContent != null) {
+            newPost.text_content(textContent);
         }
 
-        newPost.setImages(postImagesObjects);
+        if (images != null) {
+            Iterator<MultipartFile> imagesIter = images.iterator();
+            List<Image> postImagesObjects = new ArrayList<Image>(images.size());
+
+            // Check if directory exists, if not it creates it
+            File dir = new File(imagesDir);
+            if (!dir.exists())
+                dir.mkdirs();
+            
+            while (imagesIter.hasNext()) {
+                MultipartFile currentImage = imagesIter.next();
+
+                try {
+                    currentImage.transferTo(dir.toPath().resolve(currentImage.getOriginalFilename()));
+                    postImagesObjects.add(
+                        new Image()
+                        .name(currentImage.getOriginalFilename()));
+                } catch (Exception exception) {
+                    System.out.println(exception);
+                    return new ResponseEntity<String>("Error happened while saving the post image",
+                            HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            }
+
+            newPost.setImages(postImagesObjects);
+        }
+
         postRepository.save(newPost);
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
-    public ResponseEntity<?> getPostImage(int imageId){
-        Optional<Image> image=imageRepository.findById(imageId);
+    public ResponseEntity<?> getPostImage(int imageId) {
+        Optional<Image> image = imageRepository.findById(imageId);
 
-        if(image.isEmpty()){
+        if (image.isEmpty()) {
             return new ResponseEntity<String>("Image Not Found", HttpStatus.NOT_FOUND);
         }
 
-        String imageFullPath = imagesDir + image.get().getName();
         Resource imageResource;
         try {
-            imageResource = new UrlResource(imageFullPath);
+            imageResource = new UrlResource(Path.of(imagesDir, image.get().getName()).toUri());
         } catch (MalformedURLException e) {
             return new ResponseEntity<String>("Error while retrieving the image", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageResource);
     }
 
-    public ResponseEntity<?> likePost(int postId, String userEmail){
-        Optional<Post> postOptional=postRepository.findById(postId);
+    public ResponseEntity<?> likePost(int postId, String userEmail) {
+        Optional<Post> postOptional = postRepository.findById(postId);
 
-        if(postOptional.isEmpty()){
+        if (postOptional.isEmpty()) {
             return new ResponseEntity<String>("Post Not Found", HttpStatus.NOT_FOUND);
         }
 
-        Post post=postOptional.get();
+        Post post = postOptional.get();
 
-        Optional<User> userOptional=userRepository.findById(userEmail);
+        Optional<User> userOptional = userRepository.findById(userEmail);
 
-        if(userOptional.isEmpty()){
+        if (userOptional.isEmpty()) {
             return new ResponseEntity<String>("User Not Found", HttpStatus.NOT_FOUND);
         }
 
-        User user=userOptional.get();
+        User user = userOptional.get();
 
-        Like like=new Like()
+        PostLike like = new PostLike()
                 .user(user)
                 .date_created(new Timestamp(Instant.now().toEpochMilli()));
 
@@ -170,29 +181,29 @@ public class PostsService {
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
-    public ResponseEntity<?> unLikePost(int postId, String userEmail){
-        Optional<Post> postOptional=postRepository.findById(postId);
+    public ResponseEntity<?> unLikePost(int postId, String userEmail) {
+        Optional<Post> postOptional = postRepository.findById(postId);
 
-        if(postOptional.isEmpty()){
+        if (postOptional.isEmpty()) {
             return new ResponseEntity<String>("Post Not Found", HttpStatus.NOT_FOUND);
         }
 
-        Post post=postOptional.get();
+        Post post = postOptional.get();
 
-        Optional<User> userOptional=userRepository.findById(userEmail);
+        Optional<User> userOptional = userRepository.findById(userEmail);
 
-        if(userOptional.isEmpty()){
+        if (userOptional.isEmpty()) {
             return new ResponseEntity<String>("User Not Found", HttpStatus.NOT_FOUND);
         }
 
-        User user=userOptional.get();
+        User user = userOptional.get();
 
-        Iterator<Like> likeIterator= post.getLikes().iterator();
+        Iterator<PostLike> likeIterator = post.getLikes().iterator();
 
         while (likeIterator.hasNext()) {
-            Like like = likeIterator.next();
+            PostLike like = likeIterator.next();
 
-            if(like.getUser()==user){
+            if (like.getUser() == user) {
                 likeRepository.delete(like);
                 break;
             }
@@ -201,28 +212,28 @@ public class PostsService {
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
-    public ResponseEntity<?> commentPost(int postId, String userEmail, String commentText){
-        Optional<Post> postOptional=postRepository.findById(postId);
+    public ResponseEntity<?> commentPost(int postId, String userEmail, String commentText) {
+        Optional<Post> postOptional = postRepository.findById(postId);
 
-        if(postOptional.isEmpty()){
+        if (postOptional.isEmpty()) {
             return new ResponseEntity<String>("Post Not Found", HttpStatus.NOT_FOUND);
         }
 
-        Post post=postOptional.get();
+        Post post = postOptional.get();
 
-        Optional<User> userOptional=userRepository.findById(userEmail);
+        Optional<User> userOptional = userRepository.findById(userEmail);
 
-        if(userOptional.isEmpty()){
+        if (userOptional.isEmpty()) {
             return new ResponseEntity<String>("User Not Found", HttpStatus.NOT_FOUND);
         }
 
-        User user=userOptional.get();
+        User user = userOptional.get();
 
-        if(commentText.isBlank()){
+        if (commentText.isBlank()) {
             return new ResponseEntity<String>("Comment is Empty", HttpStatus.BAD_REQUEST);
         }
 
-        Comment comment=new Comment()
+        Comment comment = new Comment()
                 .text_content(commentText)
                 .user(user)
                 .date_sent(new Timestamp(Instant.now().toEpochMilli()));

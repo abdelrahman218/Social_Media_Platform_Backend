@@ -4,40 +4,40 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class FriendId implements Serializable{
-    private int user1;
-    private int user2;
-
+    private String user1;
+    private String user2;
+    
 
     public FriendId() {
     }
 
-    public FriendId(int user1, int user2) {
+    public FriendId(String user1, String user2) {
         this.user1 = user1;
         this.user2 = user2;
     }
 
-    public int getUser1() {
+    public String getUser1() {
         return this.user1;
     }
 
-    public void setUser1(int user1) {
+    public void setUser1(String user1) {
         this.user1 = user1;
     }
 
-    public int getUser2() {
+    public String getUser2() {
         return this.user2;
     }
 
-    public void setUser2(int user2) {
+    public void setUser2(String user2) {
         this.user2 = user2;
     }
 
-    public FriendId user1(int user1) {
+    public FriendId user1(String user1) {
         setUser1(user1);
         return this;
     }
 
-    public FriendId user2(int user2) {
+    public FriendId user2(String user2) {
         setUser2(user2);
         return this;
     }
@@ -50,7 +50,7 @@ public class FriendId implements Serializable{
             return false;
         }
         FriendId friendId = (FriendId) o;
-        return user1 == friendId.user1 && user2 == friendId.user2;
+        return Objects.equals(user1, friendId.user1) && Objects.equals(user2, friendId.user2);
     }
 
     @Override
@@ -65,5 +65,5 @@ public class FriendId implements Serializable{
             ", user2='" + getUser2() + "'" +
             "}";
     }
-    
+
 }
