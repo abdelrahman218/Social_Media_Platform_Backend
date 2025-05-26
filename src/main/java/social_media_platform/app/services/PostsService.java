@@ -204,11 +204,13 @@ public class PostsService {
             PostLike like = likeIterator.next();
 
             if (like.getUser() == user) {
+                post.getLikes().remove(like);
                 likeRepository.delete(like);
                 break;
             }
         }
 
+        postRepository.save(post);
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
