@@ -49,7 +49,7 @@ public class User {
     }
 
     public boolean checkPassword(String password) {
-        return this.password==password;
+        return this.password.equals(password);
     }
 
     public void setPassword(String password) {
