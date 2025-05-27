@@ -255,4 +255,55 @@ public class PostsService {
 
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
+     public List<Post> getUserPosts(String email) {
+        List<Post> allPosts = new ArrayList<Post>();
+        User user = userRepository.findById(email)
+                .orElseThrow(() -> new RuntimeException("User Not Found"));
+        allPosts.addAll(postRepository.findByUser(user));
+        return allPosts;
+    }
+    public ResponseEntity<?> deletePost(int postId, String userEmail) {
+        Optional<Post> postOptional = postRepository.findById(postId);
+
+        if (postOptional.isEmpty()) {
+            return new ResponseEntity<String>("Post Not Found", HttpStatus.NOT_FOUND);
+        }
+
+        Post post = postOptional.get();
+
+        if (!post.getUser().getEmail().equals(userEmail)) {
+            return new ResponseEntity<String>("You are not authorized to delete this post", HttpStatus.UNAUTHORIZED);
+        }
+
+        postRepository.delete(post);
+        return new ResponseEntity<Void>(HttpStatus.OK);
+    }
+    public ResponseEntity<?> editPost(int postId, String userEmail, String newTextContent, List<MultipartFile> newImages) {
+        Optional<Post> postOptional = postRepository.findById(postId);
+
+        if (postOptional.isEmpty()) {
+            return new ResponseEntity<String>("Post Not Found", HttpStatus.NOT_FOUND);
+        }
+
+        Post post = postOptional.get();
+
+        if (!post.getUser().getEmail().equals(userEmail)) {
+            return new ResponseEntity<String>("You are not authorized to edit this post", HttpStatus.UNAUTHORIZED);
+        }
+
+        if (newTextContent != null) {
+            post.text_content(newTextContent);
+        }
+
+        if (newImages != null) {
+            try {
+                addPostImages(post, newImages);
+            } catch (IOException e) {
+                return new ResponseEntity<String>("Error while saving images", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        postRepository.save(post);
+        return new ResponseEntity<Void>(HttpStatus.OK);
+    }
 }
