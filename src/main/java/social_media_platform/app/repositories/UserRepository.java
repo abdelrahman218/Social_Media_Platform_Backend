@@ -4,4 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import social_media_platform.app.models.User;
 
-public interface UserRepository extends JpaRepository<User, String>{}
+public interface UserRepository extends JpaRepository<User, String>{
+    User findByEmail(String email);
+}
