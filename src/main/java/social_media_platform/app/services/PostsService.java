@@ -255,4 +255,11 @@ public class PostsService {
 
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
+     public List<Post> getUserPosts(String email) {
+        List<Post> allPosts = new ArrayList<Post>();
+        User user = userRepository.findById(email)
+                .orElseThrow(() -> new RuntimeException("User Not Found"));
+        allPosts.addAll(postRepository.findByUser(user));
+        return allPosts;
+    }
 }
