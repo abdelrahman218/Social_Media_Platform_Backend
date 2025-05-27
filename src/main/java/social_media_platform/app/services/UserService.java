@@ -69,4 +69,36 @@ public class UserService {
 
         return new ResponseEntity<List<User>>(friendUsers, HttpStatus.OK);
     }
+      public ResponseEntity<?> isPrivate(String userEmail) {
+        Optional<User> userOptional = userRepository.findById(userEmail);
+
+        if (userOptional.isEmpty()) {
+            return new ResponseEntity<String>("User Not Found", HttpStatus.NOT_FOUND);
+        }
+
+        User user = userOptional.get();
+
+        if (user.getIsPrivate()) {
+            return new ResponseEntity<String>("User is private", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<String>("User is public", HttpStatus.OK);
+        }
+    }
+     public ResponseEntity<?> togglePrivate(String userEmail) {
+        Optional<User> userOptional = userRepository.findById(userEmail);
+
+        if (userOptional.isEmpty()) {
+            return new ResponseEntity<String>("User Not Found", HttpStatus.NOT_FOUND);
+        }
+
+        User user = userOptional.get();
+        user.setIsPrivate(!user.getIsPrivate());
+        userRepository.save(user);
+
+          if (user.getIsPrivate()) {
+            return new ResponseEntity<String>("User is now private", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<String>("User is now public", HttpStatus.OK);
+        }
+    }  
 }

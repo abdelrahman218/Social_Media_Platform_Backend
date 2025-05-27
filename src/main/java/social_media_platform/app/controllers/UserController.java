@@ -82,4 +82,23 @@ public class UserController {
     public ResponseEntity<?> getFriends(@RequestParam String email) {
         return userService.getFriendsByUserEmail(email);
     }
+    @GetMapping("/deletePost")
+    public ResponseEntity<?> deletePost(@RequestParam int postId, @RequestParam String userEmail) {
+        return postsService.deletePost(postId, userEmail);
+    }
+    @PostMapping(value = "/editPost", consumes = "multipart/form-data")
+    public ResponseEntity<?> editPost(
+            @RequestPart String postId,
+            @RequestPart(required = false) String textContent,
+            @RequestPart(required = false) List<MultipartFile> images,@RequestPart String userEmail) {
+        return postsService.editPost(Integer.parseInt(postId),userEmail, textContent, images);
+    }
+    @GetMapping("/getPrivate")
+    public ResponseEntity<?> isPrivate(@RequestParam String userEmail) {
+        return userService.isPrivate(userEmail);
+    }
+    @PostMapping("/togglePrivate")
+    public ResponseEntity<?> togglePrivate(@RequestParam String userEmail) {
+        return userService.togglePrivate(userEmail);
+    }
 }
