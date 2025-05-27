@@ -1,6 +1,8 @@
 package social_media_platform.app.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -10,7 +12,6 @@ import social_media_platform.app.repositories.MessageRepository;
 import social_media_platform.app.repositories.UserRepository;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,11 +34,27 @@ public class MessageService {
         User sender = senderOptional.get();
         User receiver = receiverOptional.get();
 
-        List<Message> messages = new ArrayList<>();
-        messages.addAll(messageRepository.findBySenderAndReceiverOrderByTimestampAsc(sender, receiver));
-        messages.addAll(messageRepository.findByReceiverAndSenderOrderByTimestampAsc(receiver, sender));
+        // Use the new repository method to fetch all messages between the two users
+        List<Message> messages = messageRepository.findConversation(sender, receiver);
 
         return new ResponseEntity<List<Message>>(messages, HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> getLatestMessage(String userEmail1, String userEmail2) {
+        Optional<User> user1 = userRepository.findById(userEmail1);
+        Optional<User> user2 = userRepository.findById(userEmail2);
+
+        if (user1.isEmpty() || user2.isEmpty()) {
+            return new ResponseEntity<String>("User not found", HttpStatus.NOT_FOUND);
+        }
+
+        Pageable pageable = PageRequest.of(0, 1);
+        List<Message> messages = messageRepository.findLatestMessageBetween(user1.get(), user2.get(), pageable);
+
+        if (messages.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(messages.get(0), HttpStatus.OK);
     }
 
     public ResponseEntity<?> sendMessage(String senderEmail, String receiverEmail, String content) {

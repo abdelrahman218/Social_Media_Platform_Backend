@@ -11,6 +11,11 @@ public class MessageController {
     @Autowired
     private MessageService messageService;
 
+    // DTO for receiving message text from frontend
+    public static class MessageRequest {
+        public String text;
+    }
+
     @GetMapping
     public ResponseEntity<?> getMessages(
             @RequestParam String senderEmail,
@@ -18,11 +23,18 @@ public class MessageController {
         return messageService.getMessages(senderEmail, receiverEmail);
     }
 
+    @GetMapping("/latest")
+    public ResponseEntity<?> getLatestMessage(
+            @RequestParam String userEmail1,
+            @RequestParam String userEmail2) {
+        return messageService.getLatestMessage(userEmail1, userEmail2);
+    }
+
     @PostMapping
     public ResponseEntity<?> sendMessage(
             @RequestParam String senderEmail,
             @RequestParam String receiverEmail,
-            @RequestBody String content) {
-        return messageService.sendMessage(senderEmail, receiverEmail, content);
+            @RequestBody MessageRequest request) {
+        return messageService.sendMessage(senderEmail, receiverEmail, request.text);
     }
 } 
