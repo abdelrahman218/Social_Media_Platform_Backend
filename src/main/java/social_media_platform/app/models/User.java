@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import java.util.Objects;
+import java.time.LocalDate;
 
 @Entity
 public class User {
@@ -19,17 +20,24 @@ public class User {
     @Column(nullable = false)
     private boolean isPrivate;
 
+    @Column(nullable = false)
+    private String gender;
+
+    @Column(nullable = false)
+    private LocalDate dateOfBirth;
 
     public User() {
     }
 
-    public User(String email, String full_name, String password, String bio, String profile_picture_name, boolean isPrivate) {
+    public User(String email, String full_name, String password, String bio, String profile_picture_name, boolean isPrivate, String gender, LocalDate dateOfBirth) {
         this.email = email;
         this.full_name = full_name;
         this.password = password;
         this.bio = bio;
         this.profile_picture_name = profile_picture_name;
         this.isPrivate = isPrivate;
+        this.gender = gender;
+        this.dateOfBirth = dateOfBirth;
     }
 
     public String getEmail() {
@@ -49,11 +57,19 @@ public class User {
     }
 
     public boolean checkPassword(String password) {
-        return this.password==password;
+        return this.password.equals(password);
     }
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
     }
 
     public String getBio() {
@@ -82,6 +98,22 @@ public class User {
 
     public void setIsPrivate(boolean isPrivate) {
         this.isPrivate = isPrivate;
+    }
+
+    public String getGender() {
+        return this.gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public LocalDate getDateOfBirth() {
+        return this.dateOfBirth;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
     }
 
     public User email(String email) {
@@ -114,6 +146,16 @@ public class User {
         return this;
     }
 
+    public User gender(String gender) {
+        setGender(gender);
+        return this;
+    }
+
+    public User dateOfBirth(LocalDate dateOfBirth) {
+        setDateOfBirth(dateOfBirth);
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == this)
@@ -122,12 +164,19 @@ public class User {
             return false;
         }
         User user = (User) o;
-        return Objects.equals(email, user.email) && Objects.equals(full_name, user.full_name) && Objects.equals(password, user.password) && Objects.equals(bio, user.bio) && Objects.equals(profile_picture_name, user.profile_picture_name) && isPrivate == user.isPrivate;
+        return Objects.equals(email, user.email) && 
+               Objects.equals(full_name, user.full_name) && 
+               Objects.equals(password, user.password) && 
+               Objects.equals(bio, user.bio) && 
+               Objects.equals(profile_picture_name, user.profile_picture_name) && 
+               isPrivate == user.isPrivate &&
+               Objects.equals(gender, user.gender) &&
+               Objects.equals(dateOfBirth, user.dateOfBirth);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(email, full_name, password, bio, profile_picture_name, isPrivate);
+        return Objects.hash(email, full_name, password, bio, profile_picture_name, isPrivate, gender, dateOfBirth);
     }
 
     @Override
@@ -138,7 +187,8 @@ public class User {
             ", bio='" + getBio() + "'" +
             ", profile_picture_name='" + getProfile_picture_name() + "'" +
             ", isPrivate='" + isIsPrivate() + "'" +
+            ", gender='" + getGender() + "'" +
+            ", dateOfBirth='" + getDateOfBirth() + "'" +
             "}";
     }
-    
 }
