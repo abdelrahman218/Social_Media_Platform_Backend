@@ -64,6 +64,14 @@ public class User {
         this.password = password;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
+    }
+
     public String getBio() {
         return this.bio;
     }

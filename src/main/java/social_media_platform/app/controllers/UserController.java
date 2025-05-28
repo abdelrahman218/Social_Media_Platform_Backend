@@ -62,14 +62,14 @@ public class UserController {
         return userService.getUserById(email);
     }
 
-    @PostMapping("/updateUser")
-    public ResponseEntity<?> updateUser(@RequestParam String email, @RequestBody User updatedUser) {
-        return userService.updateUser(email, updatedUser);
-    }
-
-    @GetMapping("/getAllUsers")
-    public ResponseEntity<?> getAllUsers() {
-        return userService.getAllUsers();
+    @PostMapping("/{email}")
+    public ResponseEntity<?> updateUser(
+            @PathVariable String email,
+            @RequestPart("full_name")String full_name,
+            @RequestPart("bio") String bio,
+            @RequestPart("password") String password,
+            @RequestPart(value = "images",required = false) MultipartFile images) {
+        return userService.updateUserWithImage(email, bio,password,full_name, images);
     }
     
     @GetMapping("/getUserPosts")
@@ -91,11 +91,7 @@ public class UserController {
             @RequestPart(required = false) List<MultipartFile> images,@RequestPart String userEmail) {
         return postsService.editPost(Integer.parseInt(postId),userEmail, textContent, images);
     }
-    @GetMapping("/getPrivate")
-    public ResponseEntity<?> isPrivate(@RequestParam String userEmail) {
-        return userService.isPrivate(userEmail);
-    }
-    @PostMapping("/togglePrivate")
+    @GetMapping("/togglePrivate")
     public ResponseEntity<?> togglePrivate(@RequestParam String userEmail) {
         return userService.togglePrivate(userEmail);
     }

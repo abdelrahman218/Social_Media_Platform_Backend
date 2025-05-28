@@ -12,17 +12,21 @@ import social_media_platform.app.models.JoinedIds.FriendId;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @IdClass(FriendId.class)
 public class Friend {
     @Id
     @ManyToOne
     @JoinColumn(name = "user_1_email", columnDefinition = "VARCHAR(255)" ,referencedColumnName = "email")
+    @JsonIgnore
     private User user1;
 
     @Id
     @ManyToOne
     @JoinColumn(name = "user_2_email", columnDefinition = "VARCHAR(255)" ,referencedColumnName = "email")
+    @JsonIgnore
     private User user2;
 
     @Column(nullable = false)
